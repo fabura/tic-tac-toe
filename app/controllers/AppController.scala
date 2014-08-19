@@ -36,7 +36,7 @@ object AppController extends Controller with Secured{
   val timerActor = Akka.system.actorOf(Props[TimerActor])
 
   /**
-   * This function crate a WebSocket using the
+   * This function create a WebSocket using the
    * enumertator linked to the current user,
    * retreived from the TaskActor. 
    */

@@ -43,10 +43,10 @@ class TimerActor extends Actor {
       // Channel is very useful class, it allows to write data inside its related 
       // enumerator, that allow to create WebSocket or Streams around that enumerator and
       // write data iside that using its related Channel
-      val userChannel: UserChannel = webSockets.get(userId) getOrElse {
+      val userChannel: UserChannel = webSockets.getOrElse(userId, {
         val broadcast: (Enumerator[JsValue], Channel[JsValue]) = Concurrent.broadcast[JsValue]
-        UserChannel(userId, 0, broadcast._1, broadcast._2)
-      }
+        UserChannel(userId, 0, broadcast._1., broadcast._2)
+      })
 
       // if user open more then one connection, increment just a counter instead of create
       // another touple (Enumerator, Channel), and return current enumerator,
