@@ -45,7 +45,7 @@ class TimerActor extends Actor {
       // write data iside that using its related Channel
       val userChannel: UserChannel = webSockets.getOrElse(userId, {
         val broadcast: (Enumerator[JsValue], Channel[JsValue]) = Concurrent.broadcast[JsValue]
-        UserChannel(userId, 0, broadcast._1., broadcast._2)
+        UserChannel(userId, 0, broadcast._1, broadcast._2)
       })
 
       // if user open more then one connection, increment just a counter instead of create
@@ -70,7 +70,7 @@ class TimerActor extends Actor {
         case (userId, millis) =>
           usersTimes += (userId -> (millis + 1000))
 
-          val json = Map("data" -> toJson(millis))
+          val json = Map("time" -> toJson(millis), "message" -> toJson("It is a custom message"))
 
           // writing data to tha channel,
           // will send data to all WebSocket opend form every user

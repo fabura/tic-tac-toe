@@ -6,6 +6,8 @@
         {{time | timer}}
       </h1>
     </div>
+        <h2>{{ message }}</h2>
+      <input type="text" ng-model="upText" ng-change="push()"/>
 
     <button class="btn btn-primary col-sm-4 col-sm-offset-1" ng-click="start()">Start</button>
     <button class="btn btn-default col-sm-4 col-sm-offset-1" ng-click="stop()">Stop</button>

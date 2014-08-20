@@ -53,7 +53,7 @@ object AppController extends Controller with Secured{
           // create a Itreatee which ignore the input and
           // and send a SocketClosed message to the actor when
           // connection is closed from the client
-          (Iteratee.ignore[JsValue] mapDone {
+          (Iteratee.foreach[JsValue](msg => println(msg)). mapDone {
             _ =>
               timerActor ! SocketClosed(userId)
           }, enumerator.asInstanceOf[Enumerator[JsValue]])
