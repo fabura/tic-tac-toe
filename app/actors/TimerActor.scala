@@ -110,16 +110,3 @@ class TimerActor extends Actor {
 
 }
 
-
-sealed trait SocketMessage
-
-case class StartSocket(userId: Int) extends SocketMessage
-
-case class SocketClosed(userId: Int) extends SocketMessage
-
-case class UpdateTime() extends SocketMessage
-
-case class Start(userId: Int) extends SocketMessage
-
-case class Stop(userId: Int) extends SocketMessage
-

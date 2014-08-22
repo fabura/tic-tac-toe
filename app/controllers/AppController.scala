@@ -26,14 +26,14 @@ import play.api.Routes
  * Date: 17/06/13
  * Time: 23:25
  */
-object AppController extends Controller with Secured{
+object AppController extends Controller with Secured {
 
   def index = withAuth {
     implicit request => userId =>
       Ok(views.html.app.index())
   }
 
-  val timerActor = Akka.system.actorOf(Props[TimerActor])
+  val managerActor = Akka.system.actorOf(Props[ManagerActor])
 
   /**
    * This function create a WebSocket using the
@@ -47,29 +47,21 @@ object AppController extends Controller with Secured{
 
       // using the ask pattern of akka, 
       // get the enumerator for that user
-      (timerActor ? StartSocket(userId)) map {
-        enumerator =>
-
-          // create a Itreatee which ignore the input and
-          // and send a SocketClosed message to the actor when
-          // connection is closed from the client
-          (Iteratee.foreach[JsValue](msg => println(msg)). mapDone {
-            _ =>
-              timerActor ! SocketClosed(userId)
-          }, enumerator.asInstanceOf[Enumerator[JsValue]])
+      (managerActor ? StartSocket(userId)) map {
+        case gamer: Gamer => (gamer.iteratee, gamer.enumerator)
       }
   }
 
   def start = withAuth {
     userId => implicit request =>
-      timerActor ! Start(userId)
+      managerActor ! Start(userId)
       Ok("")
   }
 
 
   def stop = withAuth {
     userId => implicit request =>
-      timerActor ! Stop(userId)
+      managerActor ! Stop(userId)
       Ok("")
   }
 
@@ -89,7 +81,7 @@ object AppController extends Controller with Secured{
 trait Secured {
   def username(request: RequestHeader) = {
     //verify or create session, this should be a real login
-    request.session.get(Security.username) 
+    request.session.get(Security.username)
   }
 
   /**
@@ -146,7 +138,7 @@ trait Secured {
 
           case Some(id) =>
             f(id.toInt)
-            
+
         }
     }
   }
