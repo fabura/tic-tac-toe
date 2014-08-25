@@ -31,9 +31,9 @@ utils.filter('timer', ['time', (time) ->
     $scope.socket = new WebSocket(wsUrl)
     $scope.socket.onmessage = (msg) ->
       $scope.$apply(->
-        console.log "received : #{msg}"
         data = JSON.parse(msg.data)
         $scope.message = data.message
+        console.log "received : #{$scope.message}"
         $scope.time = data.time
       )
 

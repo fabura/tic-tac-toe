@@ -43,12 +43,12 @@ object AppController extends Controller with Secured {
   def indexWS = withAuthWS {
     userId =>
 
-      implicit val timeout = Timeout(3 seconds)
+      implicit val timeout = Timeout(3 hours)
 
       // using the ask pattern of akka, 
       // get the enumerator for that user
       (managerActor ? StartSocket(userId)) map {
-        case gamer: Gamer => (gamer.iteratee, gamer.enumerator)
+        case (iteratee:Iteratee[JsValue, Unit],enumerator:Enumerator[JsValue]) => (iteratee, enumerator)
       }
   }
 

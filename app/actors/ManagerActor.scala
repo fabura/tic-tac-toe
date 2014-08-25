@@ -13,21 +13,29 @@ import scala.concurrent.duration._
 import play.api.Play.current
 import ExecutionContext.Implicits.global
 
+import play.api.libs.json._
+import play.api.libs.json.Json._
+
 /* Created by bfattahov on 22.08.14. */
 class ManagerActor extends Actor {
 
   override def receive: Receive = {
-    case StartSocket => {
+    case StartSocket(userId) => {
       val (enumerator, channel) = Concurrent.broadcast[JsValue]
 
-      Akka.system.actorOf(Props(new Gamer(1, enumerator, channel, self)))
-      sender ! (channel, enumerator)
+      val gamer = Akka.system.actorOf(Props(new Gamer(userId, enumerator, channel, self)))
+      val iteratee = Iteratee.foreach[JsValue](json => gamer ! Input(json)).mapDone(_ => gamer ! SocketClosed(userId))
+      sender !(iteratee, enumerator)
     }
-    case x: JsValue => println(s"Message from $sender: $x")
-    case SocketClosed(userId) =>  println(s"User $userId closed")
+    case x: JsValue => {
+      println(s"Message from $sender: $x")
+      sender ! Message(Json.toJson(Map("message" -> toJson(s"Okay! You send: $x"))))
+    }
+    case SocketClosed(userId) => println(s"User $userId closed")
   }
 
 }
+
 //
 //class GameActor(player1: ActorRef, player2: ActorRef) extends Actor {
 //  override def receive: Actor.Receive = ???
@@ -37,17 +45,18 @@ class ManagerActor extends Actor {
 //  override def receive: Actor.Receive = ???
 //}
 
-class Gamer(userId: Int,val enumerator: Enumerator[JsValue], channel: Channel[JsValue], receiver: ActorRef) extends Actor {
-
-  val iteratee = Iteratee.foreach[JsValue](json => receiver ! json).mapDone(_ => receiver ! SocketClosed(userId))
+class Gamer(userId: Int, val enumerator: Enumerator[JsValue], channel: Channel[JsValue], receiver: ActorRef) extends Actor {
 
   override def receive: Actor.Receive = {
+    case Input(json) => receiver ! json
     case Message(json) => channel push json
   }
 }
 
 
- trait SocketMessage
+trait SocketMessage
+
+case object GetIteratee extends SocketMessage
 
 case class StartSocket(userId: Int) extends SocketMessage
 
